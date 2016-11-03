@@ -1,0 +1,1 @@
+{"routes": "sample_api.lua", "version": "0.3", "default_page": "index.html", "assets": "public", "cors": {"origin": ["http://localhost:*", "https://testieieie.apps.exosite-staging.io"]}}
