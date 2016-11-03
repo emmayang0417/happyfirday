@@ -1,3 +1,21 @@
+--#ENDPOINT GET /development/device/data
+-- Description: Get timeseries data for specific device
+-- Parameters: ?identifier=<uniqueidentifier>&window=<number>
+local identifier = tostring(request.parameters.identifier) -- ?identifier=<uniqueidentifier>
+local window = tostring(request.parameters.window) -- in minutes,if ?window=<number>
+if true then
+  local data = {}
+  if window == nil then window = '30' end
+  -- Assumes temperature and humidity data device resources
+  out = Timeseries.query({
+    epoch='ms',
+    q = "SELECT value FROM gps,speed,rpm WHERE identifier = '" ..identifier.."' time > now() - "..window.."m LIMIT 5000"})
+  data['timeseries'] = out
+  return data
+else
+  http_error(403, response)
+end
+
 --#ENDPOINT GET /development/storage/keyvalue
 -- Description: Show current key-value data for a specific unique device or for full solution
 -- Parameters: ?device=<uniqueidentifier>

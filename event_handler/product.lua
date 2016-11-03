@@ -6,9 +6,16 @@
 -- PUT DATA INTO TIME SERIES DATABASE STORAGE:
 -- ============================
 -- Write All Device Resource Data to timeseries database
-Timeseries.write({
-  query = data.alias .. ",identifier=" .. data.device_sn .. " value=" .. data.value[2]
-})
+--Timeseries.write({
+--  query = data.alias .. ",identifier=" .. data.device_sn .. " value=" .. data.value[2]
+--})
+
+local q = TSW.q()
+		:write(data.alias)
+		:add_tag('identifier', data.device_sn)
+		:add_field('value', data.value[2])
+
+local r = Timeseries.write({ query = tostring(q) })
 
 -- PUT DATA INTO KEY VALUE STORE:
 -- ============================
