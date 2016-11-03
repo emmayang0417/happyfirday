@@ -45,3 +45,4 @@ value["pid"] = data.vendor or data.pid
 -- Write data into key/value data store
 Keystore.set({key = "identifier_" .. data.device_sn, value = to_json(value)})
 
+
