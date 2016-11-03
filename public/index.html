@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>123456</title>
+    <title>happyfriday</title>
     <script>
     document.write('<base href="' + document.location + '" />');
     </script>
@@ -13,9 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js"></script>
     <script src="https://rawgit.com/krispo/angular-nvd3/v1.0.4/dist/angular-nvd3.js"></script>
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
-
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-
     <script>
     (function() {
         var app = angular.module('plunker', ['nvd3']);
@@ -23,12 +21,12 @@
             $scope.options = {
                 chart: {
                     type: 'discreteBarChart',
-                    height: 450,
+                    height: 500,
                     margin: {
-                        top: 20,
-                        right: 20,
+                        top: 100,
+                        right: 100,
                         bottom: 50,
-                        left: 55
+                        left: 100
                     },
                     x: function(d) {
                         return d.label;
@@ -50,7 +48,6 @@
                     }
                 }
             };
-            console.log("asd")
             $scope.data = [{
                 key: "Cumulative Return",
                 values: [{
@@ -93,52 +90,22 @@
         });
     })()
     </script>
-
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['gauge']});
-      google.charts.setOnLoadCallback(drawChart);
-      function drawChart() {
-
-        var data = google.visualization.arrayToDataTable([
-          ['Label', 'Value'],
-          ['Temperture', 80]
-        ]);
-
-        var options = {
-          width: 400, height: 120,
-          redFrom: 90, redTo: 100,
-          yellowFrom:75, yellowTo: 90,
-          minorTicks: 5
-        };
-
-        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
-
-        chart.draw(data, options);
-
-        setInterval(function() {
-          fetchData2();
-          data.setValue
-          chart.draw(data, options);
-        }, 13000);
-      }
-    </script>
 </head>
 
 </html>
-<div id="sitebody">
-    <div id="content">
 
-        <body ng-app="plunker" ng-controller="MainCtrl">
-            <nvd3 options="options" data="data" class="with-3d-shadow with-transitions"></nvd3>
-        </body>
+<body ng-app="plunker" ng-controller="MainCtrl" bgcolor="#B7F9E5">
+    <div id="header">
+        <h1>happyfriday</h1>
     </div>
-    <div id="content">
 
-        <body ng-controller="MainCtrl">
+    <div id="sitebody">
+        <div id="content">
             <nvd3 options="options" data="data" class="with-3d-shadow with-transitions"></nvd3>
-        </body>
+            <div id="chart_div" style="width: 40px; height: 40px;"></div>
+        </div>
     </div>
-</div>
+</body>
 
 <body>
     <script>
@@ -177,10 +144,42 @@
         hasData = "false";
     }
     </script>
+    <script type="text/javascript">
+    google.charts.load('current', {
+        'packages': ['gauge']
+    });
+    google.charts.setOnLoadCallback(drawChart);
 
+    function drawChart() {
+
+        var data = google.visualization.arrayToDataTable([
+            ['Label', 'Value'],
+            ['Memory', 80],
+            ['emma', 80]
+        ]);
+
+        var options = {
+            width: 1000,
+            height: 1000,
+            redFrom: 90,
+            redTo: 100,
+            yellowFrom: 75,
+            yellowTo: 90,
+            minorTicks: 5
+        };
+
+        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+
+        chart.draw(data, options);
+
+        setInterval(function() {
+            fetchData2(data, chart, options);
+        }, 5000);
+    }
+    </script>
     <script>
-    function fetchData2() {
-        var resdata2 = {};
+    function fetchData2(data, chart, options) {
+        var resdata = {};
         var hasData = false;
 
         $.ajax({
@@ -189,12 +188,14 @@
             // dataType: "json",
             success: function(res) {
                 var json = JSON.parse(res.split('\n')[1]).value
-                resdata2 = JSON.parse(json)
+                resdata = JSON.parse(json)
                 console.log("B")
-                console.log(resdata2)
+                console.log(resdata.amb_temp)
+                data.setValue(0, 1, resdata.amb_temp);
+                data.setValue(1, 1, resdata.ecu_volt);
+                chart.draw(data, options);
 
                 hasData = true;
-                window.draw(resdata2)
             },
             crossDomain: true,
             error: function(err) {
@@ -214,22 +215,21 @@
         hasData = "false";
     }
     </script>
-
 </body>
 
 </html>
 <style type="text/css">
 #sitebody {
-    width: 600px;
+    width: 80%;
     margin: 0 auto;
     font-size: 13px;
 }
 
 #header {
-    background-color: #FFD4D4;
-    height: 80px;
+    background-color: black;
+    color: white;
     text-align: center;
-    line-height: 80px;
+    padding: 5px;
 }
 
 #sidebar_left {
@@ -253,9 +253,9 @@
 #content {
     margin-left: 40px;
     margin-right: 40px;
-    height: 400px;
-    background-color: #F2FFF2;
-    text-align: center;
+    height: 300px;
+/*    background-color: #F2FFF2;
+*/    text-align: center;
     line-height: 400px;
 }
 
