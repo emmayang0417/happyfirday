@@ -4,21 +4,20 @@
 local identifier = tostring(request.parameters.identifier) -- ?identifier=<uniqueidentifier>
 local limit = tostring(request.parameters.limit) -- in minutes,if ?window=<number>
 if true then
-  local data = {}
-  if limit == nil then limit = '30' end
-    local q = TSQ.q()
+  local data = {}
+  if limit == nil then limit = '30' end
+    local q = TSQ.q()
 
-      :fields('value')
-      :from('speed','rpm','gps','maf','engine_fuel_rate','throttle_pos',
-            'acc_pedal_pos_d','amb_temp')
-      :limit(tonumber(limit))
-                :orderby()
+      :fields('value')
+      :from('speed','rpm','gps','maf','engine_fuel_rate','throttle_pos','acc_pedal_pos_d','amb_temp')
+      :limit(tonumber(limit))
+                :orderby()
 
-    local response = Timeseries.query{q = tostring(q) }
-  data['timeseries'] = response
-  return data
+    local response = Timeseries.query{q = tostring(q) }
+  data['timeseries'] = response
+  return data
 else
-  http_error(403, response)
+  http_error(403, response)
 end
 
 --#ENDPOINT GET /development/device/data

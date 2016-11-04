@@ -16,8 +16,8 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
     (function() {
-        var app = angular.module('plunker', ['nvd3']);
-        app.controller('MainCtrl', function($scope, $interval) {
+        var app = angular.module('longChart', ['nvd3']);
+        app.controller('MainLongCtrl', function($scope, $interval) {
             $scope.options = {
                 chart: {
                     type: 'discreteBarChart',
@@ -40,10 +40,10 @@
                     },
                     duration: 500,
                     xAxis: {
-                        axisLabel: 'X Axis'
+                        axisLabel: 'OBD2 PID'
                     },
                     yAxis: {
-                        axisLabel: 'Y Axis',
+                        axisLabel: 'Value',
                         axisLabelDistance: -10
                     }
                 }
@@ -72,16 +72,21 @@
             }]
 
             $scope.draw = function(data) {
-                console.log(data)
-                console.log($scope.options)
-                console.log(typeof data.speed)
+                console.log($scope.data)
+                $scope.data[0] = $scope.data[0] || {values:[]}
+
+                $scope.data[0].values[0] = $scope.data[0].values[0] || {value:0}
                 $scope.data[0].values[0].value = parseFloat(data.throttle_pos)
+                $scope.data[0].values[1] = $scope.data[0].values[1] || {value:0}
                 $scope.data[0].values[1].value = parseFloat(data.acc_pedal_pos_d)
+                $scope.data[0].values[2] = $scope.data[0].values[2] || {value:0}
                 $scope.data[0].values[2].value = parseFloat(data.speed)
+                $scope.data[0].values[3] = $scope.data[0].values[3] || {value:0}
                 $scope.data[0].values[3].value = parseFloat(data.rpm)
+                $scope.data[0].values[4] = $scope.data[0].values[4] || {value:0}
                 $scope.data[0].values[4].value = parseFloat(data.maf)
+                $scope.data[0].values[5] = $scope.data[0].values[5] || {value:0}
                 $scope.data[0].values[5].value = parseFloat(data.engine_fuel_rate)
-                console.log($scope.data[0].values[0].value)
                 $scope.$digest()
             }
             window.draw = $scope.draw
@@ -90,180 +95,312 @@
         });
     })()
     </script>
-</head>
-
-</html>
-
-<body ng-app="plunker" ng-controller="MainCtrl" bgcolor="#B7F9E5">
-    <div id="header">
-        <h1>happyfriday</h1>
-    </div>
-
-    <div id="sitebody">
-        <div id="content">
-            <nvd3 options="options" data="data" class="with-3d-shadow with-transitions"></nvd3>
-            <div id="chart_div" style="width: 40px; height: 40px;"></div>
-        </div>
-    </div>
-</body>
-
-<body>
     <script>
-    function fetchData() {
-        var resdata = {};
-        var hasData = false;
-
-        $.ajax({
-            url: "https://obd2cloud.apps.exosite.io/development/storage/keyvalue?device=als7061",
-            type: "GET",
-            // dataType: "json",
-            success: function(res) {
-                var json = JSON.parse(res.split('\n')[1]).value
-                resdata = JSON.parse(json)
-                console.log("B")
-                console.log(resdata)
-
-                hasData = true;
-                window.draw(resdata)
-            },
-            crossDomain: true,
-            error: function(err) {
-                console.log(err)
-                hasData = false;
-            },
-            statusCode: {
-                504: function() {
-                    console.log("server not responding");
-                    $("#appstatus").text('Server Not Responding 504');
-                    $("#appstatus").css('color', red_color);
+    (function() {
+        var app = angular.module('longChart');
+        app.controller('MainCtrl', function($scope, $interval) {
+            $scope.options = {
+                chart: {
+                    type: 'lineChart',
+                    height: 450,
+                    margin: {
+                        top: 20,
+                        right: 20,
+                        bottom: 40,
+                        left: 55
+                    },
+                    x: function(d) {
+                        return d.x;
+                    },
+                    y: function(d) {
+                        return d.y;
+                    },
+                    useInteractiveGuideline: true,
+                    dispatch: {
+                        stateChange: function(e) {
+                            console.log("stateChange");
+                        },
+                        changeState: function(e) {
+                            console.log("changeState");
+                        },
+                        tooltipShow: function(e) {
+                            console.log("tooltipShow");
+                        },
+                        tooltipHide: function(e) {
+                            console.log("tooltipHide");
+                        }
+                    },
+                    xAxis: {
+                        axisLabel: 'Time (min)'
+                    },
+                    yAxis: {
+                        axisLabel: '1000*rpm | 10*(km/h)',
+                        tickFormat: function(d) {
+                            return d3.format('.02f')(d);
+                        },
+                        axisLabelDistance: -10
+                    },
+                    title: {
+                        enable: true,
+                        text: 'Car Date for Line Chart'
+                    }
                 }
-            },
-            timeout: 1000
+            };
+
+            /*Random Data Generator */
+            function sinAndCos(data) {
+                var sin = [],
+                    sin2 = [];
+
+                //Data is represented as an array of {x,y} pairs.
+                for (var i = 0; i < 60; i++) {
+                    sin.push({
+                        x: i, //Date.parse(data.results[0].series[1].values[i][0])/1000,
+                        y: parseInt(data.results[0].series[1].values[i][1]) / 1000
+                    });
+                    sin2.push({
+                        x: i, //Date.parse(data.results[0].series[0].values[i][0])/1000,
+                        y: parseInt(data.results[0].series[0].values[i][1]) / 10
+                    });
+                }
+
+                //Line chart data should be sent as an array of series objects.
+                return [{
+                    values: sin, //values - represents the array of {x,y} data points
+                    key: 'rpm', //key  - the name of the series.
+                    color: '#ff7f0e', //color - optional: choose your own line color.
+                    strokeWidth: 2,
+                    classed: 'dashed'
+                }, {
+                    values: sin2,
+                    key: 'speed',
+                    strokeWidth: 2,
+                    color: '#2ca02c',
+                    classed: 'dashed'
+                }];
+            };
+
+            $scope.drawLine = function(data) {
+                $scope.data = sinAndCos(data)
+                $scope.$digest()
+            }
+            window.drawLine = $scope.drawLine
+
+            $interval(fetchData3, 3000, 5000, true);
         });
-        console.log(hasData)
-        hasData = "false";
-    }
+    })()
     </script>
-    <script type="text/javascript">
-    google.charts.load('current', {
-        'packages': ['gauge']
+<script>
+function fetchData() {
+    var resdata = {};
+    var hasData = false;
+    $.ajax({
+        url: "https://obd2cloud.apps.exosite.io/development/storage/keyvalue?device=als7061",
+        type: "GET",
+        // dataType: "json",
+        success: function(res) {
+            var json = JSON.parse(res.split('\n')[1]).value
+            resdata = JSON.parse(json)
+            console.log("B")
+            console.log(resdata)
+
+            hasData = true;
+            window.draw(resdata)
+        },
+        crossDomain: true,
+        error: function(err) {
+            console.log(err)
+            hasData = false;
+        },
+        statusCode: {
+            504: function() {
+                console.log("server not responding");
+                $("#appstatus").text('Server Not Responding 504');
+                $("#appstatus").css('color', red_color);
+            }
+        },
+        timeout: 1000
     });
-    google.charts.setOnLoadCallback(drawChart);
+    console.log(hasData)
+    hasData = "false";
+}
+</script>
+<script type="text/javascript">
+google.charts.load('current', {
+    'packages': ['gauge']
+});
+google.charts.setOnLoadCallback(drawChart);
 
-    function drawChart() {
+function drawChart() {
 
-        var data = google.visualization.arrayToDataTable([
-            ['Label', 'Value'],
-            ['Memory', 80],
-            ['emma', 80]
-        ]);
+    var data = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['Ambient Temp', 0],
+        ['ECU Voltage', 0]
+    ]);
 
-        var options = {
-            width: 1000,
-            height: 1000,
-            redFrom: 90,
-            redTo: 100,
-            yellowFrom: 75,
-            yellowTo: 90,
-            minorTicks: 5
-        };
+    var options = {
+        width: 1000,
+        height: 1000,
+        redFrom: 90,
+        redTo: 100,
+        yellowFrom: 75,
+        yellowTo: 90,
+        minorTicks: 5
+    };
 
-        var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+    var chart = new google.visualization.Gauge(document.getElementById('chart_div'));
 
-        chart.draw(data, options);
+    chart.draw(data, options);
 
-        setInterval(function() {
-            fetchData2(data, chart, options);
-        }, 5000);
-    }
-    </script>
-    <script>
-    function fetchData2(data, chart, options) {
-        var resdata = {};
-        var hasData = false;
+    setInterval(function() {
+        fetchData2(data, chart, options);
+    }, 5000);
+}
+</script>
+<script>
+function fetchData2(data, chart, options) {
+    var resdata = {};
+    var hasData = false;
 
-        $.ajax({
-            url: "https://obd2cloud.apps.exosite.io/development/storage/keyvalue?device=als7061",
-            type: "GET",
-            // dataType: "json",
-            success: function(res) {
-                var json = JSON.parse(res.split('\n')[1]).value
-                resdata = JSON.parse(json)
-                console.log("B")
-                console.log(resdata.amb_temp)
-                data.setValue(0, 1, resdata.amb_temp);
-                data.setValue(1, 1, resdata.ecu_volt);
-                chart.draw(data, options);
+    $.ajax({
+        url: "https://obd2cloud.apps.exosite.io/development/storage/keyvalue?device=als7061",
+        type: "GET",
+        // dataType: "json",
+        success: function(res) {
+            var json = JSON.parse(res.split('\n')[1]).value
+            resdata = JSON.parse(json)
+            console.log("B")
+            console.log(resdata.amb_temp)
+            data.setValue(0, 1, resdata.amb_temp);
+            data.setValue(1, 1, resdata.ecu_volt);
+            chart.draw(data, options);
 
-                hasData = true;
-            },
-            crossDomain: true,
-            error: function(err) {
-                console.log(err)
-                hasData = false;
-            },
-            statusCode: {
-                504: function() {
-                    console.log("server not responding");
-                    $("#appstatus").text('Server Not Responding 504');
-                    $("#appstatus").css('color', red_color);
-                }
-            },
-            timeout: 1000
-        });
-        console.log(hasData)
-        hasData = "false";
-    }
-    </script>
-</body>
+            hasData = true;
+        },
+        crossDomain: true,
+        error: function(err) {
+            console.log(err)
+            hasData = false;
+        },
+        statusCode: {
+            504: function() {
+                console.log("server not responding");
+                $("#appstatus").text('Server Not Responding 504');
+                $("#appstatus").css('color', red_color);
+            }
+        },
+        timeout: 1000
+    });
+    console.log(hasData)
+    hasData = "false";
+}
+</script>
+<script>
+//line chart
+function fetchData3() {
+    var resdata = {};
+    var hasData = false;
+
+    $.ajax({
+        url: "https://obd2cloud.apps.exosite.io/development/device/data?device=als7061&limit=60",
+        type: "GET",
+        // dataType: "json",
+        success: function(res) {
+            var json = res.timeseries
+
+            hasData = true;
+            window.drawLine(json)
+        },
+        crossDomain: true,
+        error: function(err) {
+            console.log(err)
+            hasData = false;
+        },
+        statusCode: {
+            504: function() {
+                console.log("server not responding");
+                $("#appstatus").text('Server Not Responding 504');
+                $("#appstatus").css('color', red_color);
+            }
+        },
+        timeout: 1000
+    });
+    console.log(hasData)
+    hasData = "false";
+}
+</script>
+    <style type="text/css">
+      #sitebody {
+          width: 80%;
+          margin: 0 auto;
+          font-size: 13px;
+      }
+
+      #header {
+          background-color: black;
+          color: white;
+          text-align: center;
+          padding: 5px;
+      }
+
+      #sidebar_left {
+          background-color: #FFECC9;
+          width: 120px;
+          height: 400px;
+          text-align: center;
+          line-height: 400px;
+          float: left;
+      }
+
+      #sidebar_right {
+          background-color: #FFECC9;
+          width: 120px;
+          height: 400px;
+          text-align: center;
+          line-height: 400px;
+          float: right;
+      }
+
+      #content {
+          margin-left: 40px;
+          margin-right: 40px;
+          /*height: 300px;*/
+          /*    background-color: #F2FFF2;
+      */
+          text-align: center;
+          line-height: 400px;
+      }
+
+      #footer {
+          clear: both;
+          background-color: #FFD4D4;
+          height: 80px;
+          text-align: center;
+          line-height: 80px;
+      }
+
+      #chart_div > table {
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      </style>
+  </head>
+    <body ng-app="longChart" id="sitebody" bgcolor="#B7F9E5">
+      <div id="header">
+        <h1>Happy Friday</h1>
+      </div>
+      <div ng-controller="MainLongCtrl" >
+        <div id="content">
+          <nvd3 options="options" data="data"></nvd3>
+        </div>
+      </div>
+      <div ng-controller="MainCtrl" bgcolor="#B7F9E5" style="min-height:450px">
+        <div id="content2">
+          <nvd3 options="options" data="data"></nvd3>
+        </div>
+      </div>
+    <div id="chart_div" style=""></div> 
+  </body>
 
 </html>
-<style type="text/css">
-#sitebody {
-    width: 80%;
-    margin: 0 auto;
-    font-size: 13px;
-}
-
-#header {
-    background-color: black;
-    color: white;
-    text-align: center;
-    padding: 5px;
-}
-
-#sidebar_left {
-    background-color: #FFECC9;
-    width: 120px;
-    height: 400px;
-    text-align: center;
-    line-height: 400px;
-    float: left;
-}
-
-#sidebar_right {
-    background-color: #FFECC9;
-    width: 120px;
-    height: 400px;
-    text-align: center;
-    line-height: 400px;
-    float: right;
-}
-
-#content {
-    margin-left: 40px;
-    margin-right: 40px;
-    height: 300px;
-/*    background-color: #F2FFF2;
-*/    text-align: center;
-    line-height: 400px;
-}
-
-#footer {
-    clear: both;
-    background-color: #FFD4D4;
-    height: 80px;
-    text-align: center;
-    line-height: 80px;
-}
-</style>
