@@ -15,6 +15,7 @@ if true then
   		:fields('value')
   		:from('speed','rpm','gps')
   		:limit(tonumber(limit))
+                :orderby()
 
     local response = Timeseries.query{q = tostring(q) }
   data['timeseries'] = response
