@@ -154,14 +154,18 @@
 
                 //Data is represented as an array of {x,y} pairs.
                 for (var i = 0; i < 60; i++) {
-                    sin.push({
-                        x: i, //Date.parse(data.results[0].series[1].values[i][0])/1000,
-                        y: parseInt(data.results[0].series[1].values[i][1]) / 1000
-                    });
-                    sin2.push({
-                        x: i, //Date.parse(data.results[0].series[0].values[i][0])/1000,
-                        y: parseInt(data.results[0].series[0].values[i][1]) / 10
-                    });
+                    var sinY = parseInt(data.results[0].series[1].values[i][1]) / 1000
+                    var sin2Y = parseInt(data.results[0].series[0].values[i][1]) / 10
+                    if (sinY < 20 && sin2Y < 20) {
+                        sin.push({
+                            x: i, //Date.parse(data.results[0].series[1].values[i][0])/1000,
+                            y: parseInt(data.results[0].series[1].values[i][1]) / 1000
+                        });
+                        sin2.push({
+                            x: i, //Date.parse(data.results[0].series[0].values[i][0])/1000,
+                            y: parseInt(data.results[0].series[0].values[i][1]) / 10
+                        });
+                    }
                 }
 
                 //Line chart data should be sent as an array of series objects.
