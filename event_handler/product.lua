@@ -33,7 +33,10 @@ local value = {
   rpm = nil,
   maf = nil,
   engine_fuel_rate = nil,
-  gps = "undefined"
+  gps = "undefined",
+  load = nil,
+  fuel_air_comm_equ_rat = nil,
+  rel_acc_pedal_pos = nil
 }
 if type(resp) == "table" and type(resp.value) == "string" then
   value = from_json(resp.value) -- Decode from JSON to Lua Table

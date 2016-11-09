@@ -9,7 +9,7 @@ if true then
     local q = TSQ.q()
 
       :fields('value')
-      :from('speed','rpm','gps','maf','engine_fuel_rate','throttle_pos','acc_pedal_pos_d','amb_temp')
+      :from('speed','rpm','gps','maf','engine_fuel_rate','throttle_pos','acc_pedal_pos_d','amb_temp','load','fuel_air_comm_equ_rat','rel_acc_pedal_pos')
       :limit(tonumber(limit))
                 :orderby()
 
